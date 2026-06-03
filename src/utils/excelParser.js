@@ -1,0 +1,47 @@
+import * as XLSX from 'xlsx';
+
+export const parseExcelFile = (file) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = (e) => {
+      try {
+        const data = e.target.result;
+        const workbook = XLSX.read(data, { type: 'binary' });
+        
+        // Assume first sheet is the one we want, since it's the survey response
+        const firstSheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[firstSheetName];
+        
+        // Convert sheet to JSON
+        const jsonData = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+        
+        // Normalize the data keys for easier consumption in components
+        const normalizedData = jsonData.map(row => {
+          return {
+            name: row["What's your full name?"] || row["Name"] || "Unknown",
+            email: row["Best email to reach you?"] || row["Email"] || "",
+            location: row["Where are you based?"] || row["Location"] || "",
+            status: row["What best describes your current situation?"] || row["Status"] || "",
+            function: row["Back in your P&G days - what was your world?"] || row["Function"] || "",
+            tenure: row["How many years were you part of the P&G family?"] || row["Tenure"] || "",
+            generation: row["Which generation do you belong to?"] || row["Generation"] || "",
+            leadPGAF: row["Nice. Open to leading something at PGAF?"] || row["Lead PGAF?"] || "",
+            // Store raw row for backup or full search
+            raw: row
+          };
+        });
+
+        resolve(normalizedData);
+      } catch (error) {
+        reject(error);
+      }
+    };
+
+    reader.onerror = (error) => {
+      reject(error);
+    };
+
+    reader.readAsBinaryString(file);
+  });
+};
