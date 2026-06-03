@@ -74,7 +74,7 @@ const Dashboard = ({ data }) => {
     const skillsMap = {};
     data.forEach(item => {
       if (item.skills) {
-        item.skills.split(',').forEach(skill => {
+        String(item.skills).split(',').forEach(skill => {
           const s = skill.trim();
           skillsMap[s] = (skillsMap[s] || 0) + 1;
         });
@@ -89,8 +89,8 @@ const Dashboard = ({ data }) => {
     const timelineMap = {};
     data.forEach(item => {
       if (item.submittedAt) {
-        // Extract just the date part (e.g. 1/15/2026 or 2026-01-15)
-        const dateStr = item.submittedAt.split(' ')[0];
+        const submittedStr = String(item.submittedAt);
+        const dateStr = submittedStr.split(' ')[0];
         timelineMap[dateStr] = (timelineMap[dateStr] || 0) + 1;
       }
     });
