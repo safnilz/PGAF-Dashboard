@@ -141,14 +141,14 @@ body {
   text-align: left;
 }
 
-.login-input {
+.input-field.login-input {
   width: 100%;
   padding: 0.85rem 1rem 0.85rem 2.5rem;
   background: rgba(255, 255, 255, 0.9);
   border: 1px solid #e2e8f0;
 }
 
-.login-input:focus {
+.input-field.login-input:focus {
   background: white;
 }
 
