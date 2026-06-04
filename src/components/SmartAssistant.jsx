@@ -47,18 +47,28 @@ const SmartAssistant = ({ data, onSearchResults }) => {
       if (keywords.length === 0) {
         onSearchResults(data); // reset if no keywords
       } else {
-        // Build an extended search query where EVERY keyword must be present natively or fuzzily
-        // In extended search, prefixing with ' means "include"
-        // Wait, ' is exact match. Let's just join them with space, which acts as OR in basic extended search,
-        // but we want an AND like behavior if possible. 
-        // Actually, without operators, Fuse just does fuzzy matching.
-        // Let's just pass the joined keywords to let Fuse do its magic.
-        const searchQuery = keywords.join(' ');
-        
-        const results = fuseInstance.search(searchQuery);
-        // Fuse returns [{ item, score }, ...]
-        // We just need the items
-        const matchedItems = results.map(result => result.item);
+        // To achieve Fuzzy AND logic, we iteratively search the dataset for each keyword.
+        // This ensures every keyword must fuzzily exist in the profile.
+        let matchedItems = data;
+        const searchOptions = {
+          includeScore: true,
+          threshold: 0.15, // Stricter fuzzy matching
+          keys: [
+            { name: 'name', weight: 1 },
+            { name: 'location', weight: 1.5 },
+            { name: 'function', weight: 2 },
+            { name: 'skills', weight: 2 },
+            { name: 'status', weight: 1.5 },
+            { name: 'hours', weight: 1 },
+            { name: 'tenure', weight: 1 }
+          ]
+        };
+
+        keywords.forEach(keyword => {
+          const tempFuse = new Fuse(matchedItems, searchOptions);
+          const results = tempFuse.search(keyword);
+          matchedItems = results.map(result => result.item);
+        });
         
         onSearchResults(matchedItems, keywords);
       }
